@@ -1,0 +1,76 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          cors:
+            allowed-origins:
+              - "*"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowed-headers:
+              - "*"
+      routes:
+        # Rota para o Produto Service
+        - id: produto
+          uri: lb://PRODUTO-SERVICE
+          filters:
+            - StripPrefix=1
+          predicates:
+            - Path=/produto/**
+
+        # Rota para o Pedido Service
+        - id: pedido
+          uri: lb://PEDIDO-SERVICE
+          filters:
+            - StripPrefix=1
+          predicates:
+            - Path=/pedido/**
+
+        # Rota para o Swagger UI do Produto Service
+        - id: produto-swagger
+          uri: lb://PRODUTO-SERVICE
+          filters:
+            - StripPrefix=1
+          predicates:
+            - Path=/produto/swagger-ui/**
+
+        # Rota para o v3/api-docs do Produto Service
+        - id: produto-api-docs
+          uri: lb://PRODUTO-SERVICE
+          filters:
+            - StripPrefix=1
+          predicates:
+            - Path=/produto/v3/api-docs/**
+
+        # Rota para o Swagger UI do Pedido Service
+        - id: pedido-swagger
+          uri: lb://PEDIDO-SERVICE
+          filters:
+            - StripPrefix=1
+          predicates:
+            - Path=/pedido/swagger-ui/**
+
+        # Rota para o v3/api-docs do Pedido Service
+        - id: pedido-api-docs
+          uri: lb://PEDIDO-SERVICE
+          filters:
+            - StripPrefix=1
+          predicates:
+            - Path=/pedido/v3/api-docs/**
+
+  application:
+    name: gateway-service
+
+server:
+  port: 9999
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance-id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://EUREKA-SERVER:8761/eureka

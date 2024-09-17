@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: pedido-service
+  data:
+    mongodb:
+      host: MONGO-SERVER
+      port: 27017
+      database: mongodb
+  rabbitmq:
+    host: rabbit
+    port: 5672
+
+springdoc:
+  swagger-ui:
+    config-url: /pedido/v3/api-docs/swagger-config
+
+server:
+  port: 8080
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance-id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://EUREKA-SERVER:8761/eureka
+
+

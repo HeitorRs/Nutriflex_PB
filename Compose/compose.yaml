@@ -1,0 +1,87 @@
+services:
+  rabbit:
+    container_name: RABBIT-SERVER
+    image: rabbitmq:3-management
+    networks:
+      - redenutriflex_acme
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  mongo:
+    container_name: MONGO-SERVER
+    image: mongo:7-jammy
+    volumes:
+      - ./mongodb-data:/data/db
+    networks:
+      - redenutriflex_acme
+    ports:
+      - "27017:27017"
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    links:
+      - mongo
+    ports:
+      - "8099:8081"
+    networks:
+      - redenutriflex_acme
+    depends_on:
+      - mongo
+  eureka:
+    image: nutriflex/eureka:latest
+    container_name: EUREKA-SERVER
+    ports:
+      - "8761:8761"
+    networks:
+      - redenutriflex_acme
+  produto-service:
+    image: nutriflex/produto:latest
+    networks:
+      - redenutriflex_acme
+    depends_on:
+      - eureka
+      - rabbit
+    deploy:
+      replicas: 2
+  pagamento-service:
+    image: nutriflex/pagamento:latest
+    networks:
+      - redenutriflex_acme
+    depends_on:
+      - eureka
+      - rabbit
+    deploy:
+      replicas: 1
+  desconto-service:
+    image: nutriflex/desconto:latest
+    networks:
+      - redenutriflex_acme
+    depends_on:
+      - eureka
+      - rabbit
+    deploy:
+      replicas: 1
+  pedido-service:
+    image: nutriflex/pedido:latest
+    networks:
+      - redenutriflex_acme
+    depends_on:
+      - eureka
+      - mongo
+      - rabbit
+    deploy:
+      replicas: 1
+  gateway:
+    image: nutriflex/gateway:latest
+    networks:
+      - redenutriflex_acme
+    depends_on:
+      - pedido-service
+      - eureka
+      - pagamento-service
+      - produto-service
+      - desconto-service
+    ports:
+      - "9999:9999"
+networks:
+  redenutriflex_acme:
+    driver: bridge
